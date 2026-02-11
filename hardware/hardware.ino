@@ -38,7 +38,10 @@
 #define ARDUINOJSON_USE_DOUBLE      1 
 
 // DEFINE THE CONTROL PINS FOR THE DHT22 
-#define DHTPIN 26
+#define DHTPIN 23
+#define DHTTYPE DHT22
+#define LED_PIN 22
+#define NUM_LEDS 7 // Number of LEDs
 
 // MQTT CLIENT CONFIG  
 static const char* pubtopic      = "620171573";                    // Add your ID number here
@@ -80,7 +83,7 @@ double calcHeatIndex(double Temp, double Humid);
 
 /* Init class Instances for the DHT22 etcc */
 DHT dht(DHTPIN, DHTTYPE);
-
+CRGB ledArray[NUM_LEDS];
   
 
 //############### IMPORT HEADER FILES ##################
@@ -93,13 +96,16 @@ DHT dht(DHTPIN, DHTTYPE);
 #endif
 
 // Temporary Variables 
-CRGB ledArray[NUM_LEDS];
+
 
 void setup() {
   Serial.begin(115200);  // INIT SERIAL  
 
   // INITIALIZE ALL SENSORS AND DEVICES
-  FastLED.addLeds<NEOPIXEL, DATA_PIN>(ledArray, NUM_LEDS);
+  FastLED.addLeds<NEOPIXEL, LED_PIN>(ledArray, NUM_LEDS);
+  FastLED.setBrightness(250);  
+  FastLED.clear();
+  FastLED.show();
 
   dht.begin();
 
@@ -150,7 +156,7 @@ void vUpdate( void * pvParameters )  {
           double t = dht.readTemperature();   
  
 
-          if(isNumber(t)){
+          if(isNumber(t) && isNumber(h)){
               // ##Publish update according to ‘{"id": "student_id", "timestamp": 1702212234, "temperature": 30, "humidity":90, "heatindex": 30}’
 
               // 1. Create JSon object
@@ -158,11 +164,11 @@ void vUpdate( void * pvParameters )  {
               // 2. Create message buffer/array to store serialized JSON object
               char message[1100]  = {0};
               // 3. Add key:value pairs to JSon object based on above schema
-              doc["id"]         = "620171573";
-              doc["timestamp"]  = getTimeStamp();
-              doc["temperature"]     = t;
-              doc["humidity"]       = h;
-              doc["heatindex"]       = convert_fahrenheit_to_Celsius(calcHeatIndex(convert_Celsius_to_fahrenheit(t), h));
+              doc["id"] = "620171573";
+              doc["timestamp"] = getTimeStamp();
+              doc["temperature"] = t;
+              doc["humidity"] = h;
+              doc["heatindex"] = calcHeatIndex(t, h);
               // 4. Seralize / Covert JSon object to JSon string and store in message array
               serializeJson(doc, message);
               // 5. Publish message to a topic sobscribed to by both backend and frontend                
@@ -274,8 +280,11 @@ double convert_fahrenheit_to_Celsius(double f){
 }
 
 double calcHeatIndex(double Temp, double Humid){
-    // CALCULATE AND RETURN HEAT INDEX USING EQUATION FOUND AT https://byjus.com/heat-index-formula/#:~:text=The%20heat%20index%20formula%20is,an%20implied%20humidity%20of%2020%25
-    return -42.379 + (2.04901523 * Temp) + (10.14333127 * Humid) - (0.22475541 * Temp * Humid) - (0.00683783 * Temp * Temp) - (0.05481717 * Humid * Humid) + (0.00122874 * Temp * Temp * Humid) + (0.00085282 * Temp * Humid * Humid) - (0.00000199 * Temp * Temp * Humid * Humid);
+    // CALCULATE AND RETURN HEAT INDEX USING EQUATION FOUND AT https://byjus.com/heat-index-formula/#:~:text=The%20heat%20index%20formula%20is,an%20implied%20humidity%20of%2020%25 
+    Temp = convert_Celsius_to_fahrenheit(Temp);
+    double HumidIndex = -42.379 + (2.04901523 * Temp) + (10.14333127 * Humid) - (0.22475541 * Temp * Humid) - (0.00683783 * Temp * Temp) - (0.05481717 * Humid * Humid) + (0.00122874 * Temp * Temp * Humid) + (0.00085282 * Temp * Humid * Humid) - (0.00000199 * Temp * Temp * Humid * Humid);
+    
+    return convert_fahrenheit_to_Celsius(HumidIndex);
 }
  
 
