@@ -64,7 +64,7 @@ export const useAppStore = defineStore("app",() => {
               // console.log(data["data"] )
               return data["data"];
             }
-            if (data["status"] == "failed") {
+            if (data["status"] == "not found") {
               console.log("getTemperatureMMAR returned no data");
             }
           }
@@ -96,7 +96,7 @@ export const useAppStore = defineStore("app",() => {
               // console.log(data["data"] )
               return data["data"];
             }
-            if (data["status"] == "failed") {
+            if (data["status"] == "not found") {
               console.log("getHumidityMMAR returned no data");
             }
           }

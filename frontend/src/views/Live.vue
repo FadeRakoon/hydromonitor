@@ -256,7 +256,7 @@ onMounted(() => {
   Mqtt.connect(); // Connect to Broker located on the backend
   setTimeout(() => {
     // Subscribe to each topic
-    Mqtt.subscribe("620172489");
+    Mqtt.subscribe("620171573");
     //Mqtt.subscribe("topic2");
   }, 3000);
 });

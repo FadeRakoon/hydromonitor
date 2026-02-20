@@ -591,9 +591,15 @@ const updateCards = async () => {
     // 1. Convert start and end dates collected fron TextFields to 10 digit timestamps
     let startDate = new Date(start.value).getTime() / 1000;
     let endDate = new Date(end.value).getTime() / 1000;
+
+    console.log("start.value:", start.value, "startDate:", startDate);
+    console.log("end.value:", end.value, "endDate:", endDate);
+
     // 2. Fetch data from backend by calling the API functions
     const temp = await AppStore.getTemperatureMMAR(startDate, endDate);
     const humid = await AppStore.getHumidityMMAR(startDate, endDate);
+    console.log("temp response:", temp);
+    console.log("humid response:", humid);
 
     temperature.max = temp[0].max.toFixed(1);
     //3. complete for min, avg and range
@@ -616,7 +622,7 @@ onMounted(() => {
   Mqtt.connect(); // Connect to Broker located on the backend
   setTimeout(() => {
     // Subscribe to each topic
-    Mqtt.subscribe("620172489");
+    Mqtt.subscribe("620171573");
     //Mqtt.subscribe("topic2");
   }, 3000);
 });
