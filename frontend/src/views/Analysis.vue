@@ -257,7 +257,7 @@ const CreateCharts = async () => {
     ],
   });
 
-// HUMIDITY CHART
+    // HUMIDITY CHART
   humidityChart.value = Highcharts.chart("container0", {
     chart: { zoomType: "x", backgroundColor: "#1e1e1e" },
     title: {
@@ -506,37 +506,54 @@ const updateLineCharts = async () => {
 };
 
 const updateHistogramCharts = async () => {
-  if (!!start.value && !!end.value) {
-    // Convert output from Textfield components to 10 digit timestamps
-    let startDate = new Date(start.value).getTime() / 1000;
-    let endDate = new Date(end.value).getTime() / 1000;
-    // Fetch data from backend
-    const temp = await AppStore.getFreqDistro(
-      "temperature",
-      startDate,
-      endDate,
-    );
-    const humid = await AppStore.getFreqDistro("humidity", startDate, endDate);
-    const hi = await AppStore.getFreqDistro("heatindex", startDate, endDate);
-    // Create arrays for each plot
-    let temperature = [];
-    let heatindex = [];
-    let humidity = [];
+    // Retrieve Min, Max, Avg, Spread/Range for Column graph
+    if (!!start.value && !!end.value) {
+        // 1. Convert start and end dates collected fron TextFields to 10 digit timestamps
+        // Subsequently, create startDate and endDate variables and then save the respective timestamps in these variables
 
-    temp.forEach((row) => {
-      temperature.push({ x: row["_id"], y: row["count"] });
-    });
-    humid.forEach((row) => {
-      humidity.push({ x: row["_id"], y: row["count"] });
-    });
-    hi.forEach((row) => {
-      heatindex.push({ x: row["_id"], y: row["count"] });
-    });
-    // Add data to Temperature and Heat Index chart
-    histogramCharts.value.series[0].setData(temperature);
-    histogramCharts.value.series[1].setData(heatindex);
-    histogramCharts.value.series[2].setData(humidity);
-  }
+        let startDate = new Date(start.value).getTime() / 1000;
+        let endDate = new Date(end.value).getTime() / 1000;
+        // 2. Fetch data(temp, humid and hi) from backend by calling the getFreqDistro API functions for each
+        // Fetch data from backend
+        const temp = await AppStore.getFreqDistro("temperature",startDate,endDate);
+        const humid = await AppStore.getFreqDistro("humidity", startDate, endDate);
+        const hi = await AppStore.getFreqDistro("heatindex", startDate, endDate);
+
+        // 3. create an empty array for each variable (temperature, humidity and heatindex)
+        // Create arrays for each plot
+        let temperature = [];
+        let heatindex = [];
+        let humidity = [];
+        
+        // 4. Iterate through the temp variable, which contains temperature data fetched from the backend
+        // transform the data to {"x": x_value,"y": y_value} format and then push it to the temperature array created previously
+
+        temp.forEach((row) => {
+        temperature.push({ x: row["_id"], y: row["count"] });
+        });
+
+        // 5. Iterate through the humid variable, which contains humidity data fetched from the backend
+        // transform the data to {"x": x_value,"y": y_value} format and then push it to the humidity array created previously 
+
+        humid.forEach((row) => {
+        humidity.push({ x: row["_id"], y: row["count"] });
+        });
+
+        // 6. Iterate through the humid variable, which contains heat index data fetched from the backend
+        // transform the data to {"x": x_value,"y": y_value} format and then push it to the heatindex array created previously
+        
+        hi.forEach((row) => {
+        heatindex.push({ x: row["_id"], y: row["count"] });
+        });
+        
+        // Add data to Temperature and Heat Index chart
+        // 7. update series[0] for the histogram/Column chart with temperature data
+        histogramCharts.value.series[0].setData(temperature);
+        // 8. update series[1] for the histogram/Column chart with humidity data    
+        histogramCharts.value.series[1].setData(heatindex);
+        // 9. update series[2] for the histogram/Column chart with heat index data
+        histogramCharts.value.series[2].setData(humidity);
+    }
 };
 
 const updateScatterPlots = async () => {
